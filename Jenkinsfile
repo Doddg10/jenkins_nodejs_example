@@ -15,7 +15,9 @@ pipeline {
                 script {
                     // Use withCredentials block to access the credentials
                     withCredentials([
-                        usernamePassword(credentialsId: 'rds-credentials', usernameVariable: 'RDS_USERNAME', passwordVariable: 'RDS_PASSWORD'),
+                        string(credentialsId: 'rds_hostname', variable: 'RDS_HOSTNAME'),
+                        string(credentialsId: 'rds-username', variable: 'RDS_USERNAME'),
+                        string(credentialsId: 'rds-password', variable: 'RDS_PASSWORD'),
                         string(credentialsId: 'rds-port', variable: 'RDS_PORT'),
                         string(credentialsId: 'redis-hostname', variable: 'REDIS_HOSTNAME'),
                         string(credentialsId: 'redis-port', variable: 'REDIS_PORT')
