@@ -13,7 +13,15 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    // Use withCredentials block to access the credentials
+                    // Build the Docker image without passing environment variables
+                    sh 'docker build -t my-nodejs-app .'
+                }
+            }
+        }
+        
+        stage('Deploy') {
+            steps {
+                script {
                     withCredentials([
                         string(credentialsId: 'rds_hostname', variable: 'RDS_HOSTNAME'),
                         string(credentialsId: 'rds-username', variable: 'RDS_USERNAME'),
@@ -23,23 +31,16 @@ pipeline {
                         string(credentialsId: 'redis-port', variable: 'REDIS_PORT')
                     ]) {
                         sh '''
-                        docker build --build-arg RDS_HOSTNAME=$RDS_HOSTNAME \
-                        --build-arg RDS_USERNAME=$RDS_USERNAME \
-                        --build-arg RDS_PASSWORD=$RDS_PASSWORD \
-                        --build-arg RDS_PORT=$RDS_PORT \
-                        --build-arg REDIS_HOSTNAME=$REDIS_HOSTNAME \
-                        --build-arg REDIS_PORT=$REDIS_PORT \
-                        -t my-nodejs-app .
+                        docker run -d -p 3000:3000 \
+                        -e RDS_HOSTNAME=$RDS_HOSTNAME \
+                        -e RDS_USERNAME=$RDS_USERNAME \
+                        -e RDS_PASSWORD=$RDS_PASSWORD \
+                        -e RDS_PORT=$RDS_PORT \
+                        -e REDIS_HOSTNAME=$REDIS_HOSTNAME \
+                        -e REDIS_PORT=$REDIS_PORT \
+                        my-nodejs-app
                         '''
                     }
-                }
-            }
-        }
-        
-        stage('Deploy') {
-            steps {
-                script {
-                    sh 'docker run -d -p 3000:3000 my-nodejs-app'
                 }
             }
         }
